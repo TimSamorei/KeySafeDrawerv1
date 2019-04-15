@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:showIn="navigation_view">
+
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_encrypt"
+            android:icon="@drawable/ic_encrypt"
+            android:title="Encryption" />
+        <item
+            android:id="@+id/nav_decrypt"
+            android:icon="@drawable/ic_decrypt"
+            android:title="Decryption" />
+        <item
+            android:id="@+id/nav_cr"
+            android:icon="@drawable/ic_cr"
+            android:title="Challenge-Responds" />
+        <item
+            android:id="@+id/nav_keymanager"
+            android:icon="@drawable/ic_keymanager"
+            android:title="Keymanager" />
+    </group>
+
+</menu>
