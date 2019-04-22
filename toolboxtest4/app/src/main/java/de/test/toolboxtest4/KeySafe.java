@@ -63,23 +63,30 @@ class KeySafe {
 
     public static void genKey() {
 
-        try {
-            KeyPairGenerator kpg = KeyPairGenerator.getInstance(KeyProperties.KEY_ALGORITHM_RSA, "AndroidKeyStore");
-            kpg.initialize(new KeyGenParameterSpec.Builder(
-                    "alias " + counter,
-                    KeyProperties.PURPOSE_SIGN | KeyProperties.PURPOSE_VERIFY)
-                    .setDigests(KeyProperties.DIGEST_SHA256,
-                            KeyProperties.DIGEST_SHA512)
-                    .build());
-            counter++;
-            KeyPair kp = kpg.generateKeyPair();
-        } catch (InvalidAlgorithmParameterException e) {
-            e.printStackTrace();
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        } catch (NoSuchProviderException e) {
-            e.printStackTrace();
-        }
+        Runnable r = new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    KeyPairGenerator kpg = KeyPairGenerator.getInstance(KeyProperties.KEY_ALGORITHM_RSA, "AndroidKeyStore");
+                    kpg.initialize(new KeyGenParameterSpec.Builder(
+                            "alias " + counter,
+                            KeyProperties.PURPOSE_SIGN | KeyProperties.PURPOSE_VERIFY)
+                            .setDigests(KeyProperties.DIGEST_SHA256,
+                                    KeyProperties.DIGEST_SHA512)
+                            .build());
+                    counter++;
+                    KeyPair kp = kpg.generateKeyPair();
+                } catch (InvalidAlgorithmParameterException e) {
+                    e.printStackTrace();
+                } catch (NoSuchAlgorithmException e) {
+                    e.printStackTrace();
+                } catch (NoSuchProviderException e) {
+                    e.printStackTrace();
+                }
+            }
+        };
+        Thread t = new Thread(r);
+        t.start();
     }
 
     public static void flush() {
