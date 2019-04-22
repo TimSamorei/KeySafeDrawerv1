@@ -22,7 +22,7 @@ public class KeyManagerFragment extends Fragment {
         Button button_keygen = (Button) view.findViewById(R.id.button_keygen);
         button_keygen.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-               KeySafe.genKey();
+                KeySafe.genKey();
             }
         });
         Button button_flushkeysafe = (Button) view.findViewById(R.id.button_flushkeysafe);

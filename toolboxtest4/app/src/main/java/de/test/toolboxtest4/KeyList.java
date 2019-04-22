@@ -1,9 +1,11 @@
 package de.test.toolboxtest4;
 
+import android.support.annotation.DrawableRes;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 public class KeyList extends RecyclerView.Adapter<KeyList.ViewHolder> {
@@ -30,17 +32,26 @@ public class KeyList extends RecyclerView.Adapter<KeyList.ViewHolder> {
     public void onBindViewHolder(ViewHolder viewHolder, int position) {
         // - get data from your itemsData at this position
         // - replace the contents of the view with that itemsData
-        viewHolder.txtViewTitle.setText(keylist[position].getAlias());
+        viewHolder.text_keyalias.setText(keylist[position].getAlias());
+        viewHolder.text_keyalgo.setText(keylist[position].getAlgorithm());
+        viewHolder.text_keyformat.setText(keylist[position].getFormat());
+        viewHolder.img_key.setImageResource(R.drawable.ic_key);
     }
 
     // inner class to hold a reference to each item of RecyclerView
     public static class ViewHolder extends RecyclerView.ViewHolder {
 
-        public TextView txtViewTitle;
+        public TextView text_keyalias;
+        public TextView text_keyalgo;
+        public TextView text_keyformat;
+        public ImageView img_key;
 
         public ViewHolder(View itemLayoutView) {
             super(itemLayoutView);
-            txtViewTitle = (TextView) itemLayoutView.findViewById(R.id.text_keyalias);
+            text_keyalias = (TextView) itemLayoutView.findViewById(R.id.text_keyalias);
+            text_keyalgo = (TextView) itemLayoutView.findViewById(R.id.text_keyalgo);
+            text_keyformat = (TextView) itemLayoutView.findViewById(R.id.text_keyformat);
+            img_key = (ImageView) itemLayoutView.findViewById(R.id.img_keys);
     }
     }
 
