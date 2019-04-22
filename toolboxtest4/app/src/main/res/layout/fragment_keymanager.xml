@@ -3,17 +3,34 @@
     android:layout_width="match_parent" android:layout_height="match_parent"
     android:background="@android:color/holo_red_dark">
 
+    <TextView
+        android:id="@+id/text_keymanger"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Keymanager"
+        android:textSize="30dp"/>
+
+
     <Button
         android:id="@+id/button_keygen"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_toEndOf="@+id/text_keymanger"
         android:text="Key Generation" />
 
-    <TextView
+    <Button
+        android:id="@+id/button_flushkeysafe"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Keymanager"
-        android:textSize="30dp"
-        android:layout_centerInParent="true"/>
+        android:layout_toEndOf="@+id/button_keygen"
+        android:text="Flush KeyStore" />
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/keylist"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/text_keymanger"
+        android:layout_marginTop="30dp"/>
+
 
 </RelativeLayout>
