@@ -23,13 +23,12 @@ class KeySafe {
 
     private static int counter = 0;
 
-    public static KeyListItem[] getKeyList() {
+    public static ArrayList<KeyListItem> getKeyList() {
         try {
             KeyStore ks = KeyStore.getInstance("AndroidKeyStore");
             ks.load(null);
             ArrayList<String> aliases = Collections.list(ks.aliases());
-            KeyListItem[] ret = new KeyListItem[aliases.size()];
-            int i = 0;
+            ArrayList<KeyListItem> ret = new ArrayList<KeyListItem>();
             for (String alias : aliases){
                 KeyStore.Entry entry = ks.getEntry(alias, null);
                 String algorithm = "FAILED";
@@ -43,8 +42,8 @@ class KeySafe {
                     algorithm = key.getSecretKey().getAlgorithm();
                     format = key.getSecretKey().getFormat();
                 }
-                ret[i] = new KeyListItem(alias, algorithm+" KEY", "Publickey: " + format + "...");
-                i++;
+
+                ret.add(new KeyListItem(alias, algorithm+" KEY", "Publickey: " + format + "..."));
             }
             return ret;
         } catch (CertificateException e) {
@@ -61,32 +60,27 @@ class KeySafe {
         return null;
     }
 
-    public static void genKey() {
+    public static KeyListItem genKey() {
+        try {
+            KeyPairGenerator kpg = KeyPairGenerator.getInstance(KeyProperties.KEY_ALGORITHM_RSA, "AndroidKeyStore");
+            kpg.initialize(new KeyGenParameterSpec.Builder(
+                    "alias " + counter,
+                    KeyProperties.PURPOSE_SIGN | KeyProperties.PURPOSE_VERIFY)
+                    .setDigests(KeyProperties.DIGEST_SHA256,
+                            KeyProperties.DIGEST_SHA512)
+                    .build());
+            counter++;
+            KeyPair kp = kpg.generateKeyPair();
+            return new KeyListItem("alias " + counter, kp.getPrivate().getAlgorithm(), "Publickey: " + ((RSAPublicKey) kp.getPublic()).getModulus().toString().substring(0, 15) + "...");
+        } catch (InvalidAlgorithmParameterException e) {
+            e.printStackTrace();
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        } catch (NoSuchProviderException e) {
+            e.printStackTrace();
+        }
 
-        Runnable r = new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    KeyPairGenerator kpg = KeyPairGenerator.getInstance(KeyProperties.KEY_ALGORITHM_RSA, "AndroidKeyStore");
-                    kpg.initialize(new KeyGenParameterSpec.Builder(
-                            "alias " + counter,
-                            KeyProperties.PURPOSE_SIGN | KeyProperties.PURPOSE_VERIFY)
-                            .setDigests(KeyProperties.DIGEST_SHA256,
-                                    KeyProperties.DIGEST_SHA512)
-                            .build());
-                    counter++;
-                    KeyPair kp = kpg.generateKeyPair();
-                } catch (InvalidAlgorithmParameterException e) {
-                    e.printStackTrace();
-                } catch (NoSuchAlgorithmException e) {
-                    e.printStackTrace();
-                } catch (NoSuchProviderException e) {
-                    e.printStackTrace();
-                }
-            }
-        };
-        Thread t = new Thread(r);
-        t.start();
+        return null;
     }
 
     public static void flush() {

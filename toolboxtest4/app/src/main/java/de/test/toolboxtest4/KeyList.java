@@ -8,11 +8,13 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import java.util.ArrayList;
+
 public class KeyList extends RecyclerView.Adapter<KeyList.ViewHolder> {
 
-    private KeyListItem[] keylist;
+    private ArrayList<KeyListItem> keylist;
 
-    public KeyList(KeyListItem[] keylist) {
+    public KeyList(ArrayList<KeyListItem> keylist) {
         this.keylist = keylist;
     }
 
@@ -32,9 +34,9 @@ public class KeyList extends RecyclerView.Adapter<KeyList.ViewHolder> {
     public void onBindViewHolder(ViewHolder viewHolder, int position) {
         // - get data from your itemsData at this position
         // - replace the contents of the view with that itemsData
-        viewHolder.text_keyalias.setText(keylist[position].getAlias());
-        viewHolder.text_keyalgo.setText(keylist[position].getAlgorithm());
-        viewHolder.text_keyformat.setText(keylist[position].getFormat());
+        viewHolder.text_keyalias.setText(keylist.get(position).getAlias());
+        viewHolder.text_keyalgo.setText(keylist.get(position).getAlgorithm());
+        viewHolder.text_keyformat.setText(keylist.get(position).getFormat());
         viewHolder.img_key.setImageResource(R.drawable.ic_key);
     }
 
@@ -58,6 +60,6 @@ public class KeyList extends RecyclerView.Adapter<KeyList.ViewHolder> {
     // Return the size of your itemsData (invoked by the layout manager)
     @Override
     public int getItemCount() {
-        return keylist.length;
+        return keylist.size();
     }
 }
