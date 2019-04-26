@@ -4,10 +4,46 @@
     android:background="@android:color/holo_blue_dark">
 
     <TextView
+        android:id="@+id/text_encryption"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Encryption"
-        android:textSize="30dp"
-        android:layout_centerInParent="true"/>
+        android:textSize="30dp" />
+
+    <View
+        android:id="@+id/enc_divider"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="?android:attr/listDivider"
+        android:layout_below="@+id/text_encryption"/>
+
+    <TextView
+        android:id="@+id/text_enc_spinner"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Encrypt with: "
+        android:layout_below="@id/enc_divider"
+        android:textSize="20dp"/>
+
+    <Spinner
+        android:id="@+id/enc_spinner"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/enc_divider"
+        android:layout_toEndOf="@id/text_enc_spinner"/>
+
+    <EditText
+        android:id="@+id/enc_text_input"
+        android:layout_height="100dp"
+        android:layout_width="match_parent"
+        android:inputType="text"
+        android:layout_below="@+id/enc_spinner"/>
+
+    <EditText
+        android:id="@+id/enc_text_output"
+        android:layout_height="100dp"
+        android:layout_width="match_parent"
+        android:inputType="text"
+        android:layout_below="@+id/enc_text_input"/>
 
 </RelativeLayout>
