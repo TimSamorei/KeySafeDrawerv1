@@ -25,6 +25,7 @@ import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.MGF1ParameterSpec;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 
 import javax.crypto.BadPaddingException;
@@ -37,6 +38,7 @@ import javax.crypto.spec.PSource;
 class KeySafe {
 
     private static int counter = 0;
+    private static final String TAG = "KeySafe";
 
     public static ArrayList<KeyListItem> getKeyList() {
         try {
@@ -80,10 +82,11 @@ class KeySafe {
             KeyPairGenerator kpg = KeyPairGenerator.getInstance(KeyProperties.KEY_ALGORITHM_RSA, "AndroidKeyStore");
             kpg.initialize(new KeyGenParameterSpec.Builder(
                     "alias " + counter,
-                    KeyProperties.PURPOSE_ENCRYPT | KeyProperties.PURPOSE_DECRYPT)
+                    KeyProperties.PURPOSE_ENCRYPT | KeyProperties.PURPOSE_DECRYPT | KeyProperties.PURPOSE_SIGN | KeyProperties.PURPOSE_VERIFY)
                     .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_RSA_OAEP)
-                    .setDigests(KeyProperties.DIGEST_SHA256)
-                    .setKeySize(2048)
+                    .setSignaturePaddings(KeyProperties.SIGNATURE_PADDING_RSA_PKCS1)
+                    .setDigests(KeyProperties.DIGEST_SHA256, KeyProperties.DIGEST_SHA1)
+                    .setKeySize(512)
                     .build());
             counter++;
             KeyPair kp = kpg.generateKeyPair();
@@ -188,6 +191,7 @@ class KeySafe {
             ks.load(null);
             PrivateKey privateKeyEntry = ((KeyStore.PrivateKeyEntry) ks.getEntry("alias 1", null)).getPrivateKey();
 
+            Log.d(TAG, "Data to sign: " + Arrays.toString(crData));
             Signature sig = Signature.getInstance("SHA1withRSA");
             sig.initSign(privateKeyEntry);
             sig.update(crData);
@@ -207,6 +211,6 @@ class KeySafe {
         } catch (SignatureException e) {
             e.printStackTrace();
         }
-        return null;
+        return "Error".getBytes();
     }
 }

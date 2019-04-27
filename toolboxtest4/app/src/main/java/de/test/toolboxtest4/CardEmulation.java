@@ -17,7 +17,7 @@ public class CardEmulation extends HostApduService {
 
     private static final String TAG = "CardEmulation";
     private static final byte[] SELECT_PKI_APPLET_CMD = {0x00, (byte) 0xA4,
-            0x04, 0x00, 0x07, (byte) 0xA0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01};
+            0x04, 0x00, 0x07, (byte) 0xA0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00};
     private boolean selected = false;
 
     private final static byte APPLET_CLA = (byte) 0x80;
@@ -27,6 +27,7 @@ public class CardEmulation extends HostApduService {
 
     @Override
     public byte[] processCommandApdu(byte[] cmd, Bundle extras) {
+        Log.d(TAG, "Incoming APDU: " + Arrays.toString(cmd));
         if (!selected) {
             if (Arrays.equals(cmd, SELECT_PKI_APPLET_CMD)) {
                 selected = true;
@@ -45,6 +46,7 @@ public class CardEmulation extends HostApduService {
             case INS_VERIFY:
                 int dataLen = cmd[OFFSET_LC];
                 crData = Arrays.copyOfRange(cmd, OFFSET_CDATA, OFFSET_CDATA + dataLen);
+                Log.d(TAG, "Data to sign: " + Arrays.toString(crData));
                 Runnable r = new Runnable() {
 
 
