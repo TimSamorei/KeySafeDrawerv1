@@ -8,6 +8,7 @@ import android.util.Log;
 import java.io.IOException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
+import java.security.Key;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.KeyStore;
@@ -19,7 +20,9 @@ import java.security.PublicKey;
 import java.security.Signature;
 import java.security.SignatureException;
 import java.security.UnrecoverableEntryException;
+import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.security.interfaces.RSAKey;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
@@ -209,6 +212,34 @@ class KeySafe {
         } catch (UnrecoverableEntryException e) {
             e.printStackTrace();
         } catch (SignatureException e) {
+            e.printStackTrace();
+        }
+        return "Error".getBytes();
+    }
+
+    public static byte[] getCert(byte[] aliasData) {
+        try {
+            KeyStore ks = null;
+            ks = KeyStore.getInstance("AndroidKeyStore");
+            ks.load(null);
+            KeyStore.PrivateKeyEntry key =  (KeyStore.PrivateKeyEntry) ks.getEntry(new String(aliasData), null);
+
+            Certificate cert = key.getCertificate();
+            return cert.getEncoded();
+        } catch (KeyStoreException e) {
+            Log.v(TAG,"ERRROR");
+            e.printStackTrace();
+        } catch (IOException e) {
+            Log.v(TAG,"ERRROR");
+            e.printStackTrace();
+        } catch (CertificateException e) {
+            Log.v(TAG,"ERRROR");
+            e.printStackTrace();
+        } catch (NoSuchAlgorithmException e) {
+            Log.v(TAG,"ERRROR");
+            e.printStackTrace();
+        } catch (UnrecoverableEntryException e) {
+            Log.v(TAG,"ERRROR");
             e.printStackTrace();
         }
         return "Error".getBytes();
