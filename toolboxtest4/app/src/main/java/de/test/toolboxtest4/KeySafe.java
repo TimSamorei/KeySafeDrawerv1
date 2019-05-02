@@ -244,4 +244,25 @@ class KeySafe {
         }
         return "Error".getBytes();
     }
+
+    public static PrivateKey getKey(String keyAlias) {
+        try {
+            KeyStore ks = null;
+            ks = KeyStore.getInstance("AndroidKeyStore");
+            ks.load(null);
+            PrivateKey privateKeyEntry = ((KeyStore.PrivateKeyEntry) ks.getEntry(keyAlias, null)).getPrivateKey();
+            return privateKeyEntry;
+        } catch (KeyStoreException e) {
+            e.printStackTrace();
+        } catch (CertificateException e) {
+            e.printStackTrace();
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (UnrecoverableEntryException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 }
