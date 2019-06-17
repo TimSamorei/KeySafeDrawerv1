@@ -1,5 +1,6 @@
 package de.test.toolboxtest4;
 
+import android.app.AlertDialog;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -35,18 +36,17 @@ public class EncryptFragment extends Fragment {
 
         input = view.findViewById(R.id.enc_text_input);
         output = view.findViewById(R.id.enc_text_output);
+        input.setText("test");
 
         enc_spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view,
                                        int position, long id) {
-                input.setText("test");
-                output.setText("test");
+
                 String inputt = input.getText().toString();
-                Log.v("encc",inputt);
-                String outputt = KeySafe.encrypt(input.getText().toString(), parent.getItemAtPosition(position).toString());
-                Log.v("encc",outputt);
-                output.setText(outputt);
+                byte[] outputt = Crypto.encrypt(input.getText().toString(), parent.getItemAtPosition(position).toString(), "");
+                output.setText(toHex(outputt));
+                CardEmulation.setKeyAlias(parent.getItemAtPosition(position).toString());
             }
 
             @Override
@@ -55,5 +55,14 @@ public class EncryptFragment extends Fragment {
         });
 
         return view;
+    }
+
+    private static String toHex(byte[] bytes) {
+        StringBuilder buff = new StringBuilder();
+        for (byte b : bytes) {
+            buff.append(String.format("%02X", b));
+        }
+
+        return buff.toString();
     }
 }

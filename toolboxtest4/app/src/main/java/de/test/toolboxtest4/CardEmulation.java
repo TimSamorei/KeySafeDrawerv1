@@ -1,11 +1,14 @@
 package de.test.toolboxtest4;
 
+import android.app.AlertDialog;
 import android.nfc.cardemulation.HostApduService;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import static de.test.toolboxtest4.ISO7816.OFFSET_CDATA;
 import static de.test.toolboxtest4.ISO7816.OFFSET_INS;
@@ -24,16 +27,23 @@ public class CardEmulation extends HostApduService {
     private final static byte INS_GETSIGNATURE = (byte) 0xA0;
     private final static byte INS_GETCERT = (byte) 0xB0;
     private final static byte INS_GETDATA = (byte) 0xC0;
+    private final static byte INS_ENCRYPT = (byte) 0xD0;
+    private final static byte INS_DECRYPT = (byte) 0xE0;
+
+    private static String keyAlias = "alias 0";
 
     byte[] response;
     byte[] cert;
     byte[] signature;
     byte[] data;
-    String[] dataArray;
+    byte[] encdata;
+    byte[] decdata;
+    List<byte[]> dataList;
 
     @Override
     public byte[] processCommandApdu(byte[] apdu, Bundle extras) {
         Log.d(TAG, "Incoming APDU: " + Arrays.toString(apdu));
+        Log.d(TAG, "Incoming APDU(HEX): " + toHex(apdu));
         Log.d(TAG, "Incoming APDU(String): " + new String(apdu));
 
         if (Arrays.equals(apdu, SELECT_PKI_APPLET_CMD)) {
@@ -44,11 +54,12 @@ public class CardEmulation extends HostApduService {
         byte ins = apdu[OFFSET_INS];
         int dataLen = apdu[OFFSET_LC];
 
+
         switch (ins) {
             case INS_GETSIGNATURE:
                 data = Arrays.copyOfRange(apdu, OFFSET_CDATA, OFFSET_CDATA + dataLen);
-                dataArray = splitData(data);
-                signature = Crypto.sign(dataArray[0].getBytes(), dataArray[1]);
+                //dataArray = splitData(data);
+                //signature = Crypto.sign(dataArray[0].getBytes(), dataArray[1]);
                 response = createResponse(Integer.toString(signature.length).getBytes());
                 return response;
 
@@ -60,14 +71,58 @@ public class CardEmulation extends HostApduService {
 
             case INS_GETDATA:
                 data = Arrays.copyOfRange(apdu, OFFSET_CDATA, OFFSET_CDATA + dataLen);
-                dataArray = splitData(data);
-                response = createResponse(getData(dataArray[0], new Integer(dataArray[1]), new Integer(dataArray[2])));
+                dataList = splitData(data);
+                response = createResponse(getData(new String(dataList.get(0)), new Integer(new String(dataList.get(1))), new Integer(new String(dataList.get(2)))));
+                return response;
+
+            case INS_ENCRYPT:
+                data = Arrays.copyOfRange(apdu, OFFSET_CDATA, OFFSET_CDATA + dataLen);
+                dataList = splitData(data);
+                //encdata = Crypto.encrypt(new String(dataList.get(0)), new String(dataList.get(1)), new String(dataList.get(2)));
+                encdata = Crypto.encrypt(new String(dataList.get(0)), keyAlias, new String(dataList.get(2)));
+                response = createResponse(Integer.toString(encdata.length).getBytes());
+                return response;
+
+            case INS_DECRYPT:
+                data = Arrays.copyOfRange(apdu, OFFSET_CDATA, OFFSET_CDATA + dataLen);
+                dataList = splitData(data);
+                decdata = Crypto.decrypt(dataList.get(0), keyAlias, new String(dataList.get(2)));
+                response = createResponse(Integer.toString(decdata.length).getBytes());
                 return response;
 
                 default:
                     return toBytes(SW_UNKNOWN);
         }
 
+    }
+
+    private List<byte[]> splitData(byte[] data) {
+        int lastDiv = data.length;
+        List<byte[]> retList = new ArrayList<byte[]>();
+        int counter = data.length-1;
+
+        while(data[counter] != "#".getBytes()[0]) {
+            counter--;
+        }
+        byte[] ret2 = new byte[lastDiv-counter-1];
+        System.arraycopy(data, counter+1, ret2, 0, lastDiv-counter-1);
+        lastDiv = counter;
+
+        counter--;
+        while(data[counter] != "#".getBytes()[0]) {
+            counter--;
+        }
+        byte[] ret1 = new byte[lastDiv-counter-1];
+        System.arraycopy(data, counter+1, ret1, 0, lastDiv-counter-1);
+        lastDiv = counter;
+
+        byte[] ret0 = new byte[counter];
+        System.arraycopy(data, 0, ret0, 0, counter);
+
+        retList.add(ret0);
+        retList.add(ret1);
+        retList.add(ret2);
+        return retList;
     }
 
     private byte[] getData(String get, int numBytes, int chunck) {
@@ -82,6 +137,16 @@ public class CardEmulation extends HostApduService {
                 System.arraycopy(signature, chunck*200, datasig, 0, numBytes);
                 return datasig;
 
+            case "encryption":
+                byte[] dataenc = new byte[numBytes];
+                System.arraycopy(encdata, chunck*200, dataenc, 0, numBytes);
+                return dataenc;
+
+            case "decryption":
+                byte[] datadec = new byte[numBytes];
+                System.arraycopy(decdata, chunck*200, datadec, 0, numBytes);
+                return datadec;
+
                 default:
                     return null;
         }
@@ -92,7 +157,7 @@ public class CardEmulation extends HostApduService {
         System.arraycopy(bytes, 0, response, 0, bytes.length);
         System.arraycopy(toBytes(SW_SUCCESS), 0, response, bytes.length, 2);
         Log.d(TAG, "Outgoing APDU: " + Arrays.toString(response));
-        Log.d(TAG, "Outgoing APDU(String): " + new String(response));
+        Log.d(TAG, "Outgoing APDU(HEX): " + toHex(response));
         return response;
     }
 
@@ -105,8 +170,16 @@ public class CardEmulation extends HostApduService {
         return new byte[] { (byte) ((s & 0xff00) >> 8), (byte) (s & 0xff) };
     }
 
-    private String[] splitData(byte[] data) {
-        String[] ret = new String(data).split("#");
-        return ret;
+    private static String toHex(byte[] bytes) {
+        StringBuilder buff = new StringBuilder();
+        for (byte b : bytes) {
+            buff.append(String.format("%02X", b));
+        }
+
+        return buff.toString();
+    }
+
+    public static void setKeyAlias(String keyAlias) {
+        CardEmulation.keyAlias = keyAlias;
     }
 }

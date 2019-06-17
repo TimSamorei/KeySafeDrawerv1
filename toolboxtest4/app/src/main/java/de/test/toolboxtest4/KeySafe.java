@@ -1,9 +1,12 @@
 package de.test.toolboxtest4;
 
+import android.app.AlertDialog;
+import android.content.Context;
 import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyProperties;
 import android.text.Editable;
 import android.util.Log;
+import android.view.View;
 
 import java.io.IOException;
 import java.security.InvalidAlgorithmParameterException;
@@ -34,7 +37,9 @@ import java.util.Collections;
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.KeyGenerator;
 import javax.crypto.NoSuchPaddingException;
+import javax.crypto.SecretKey;
 import javax.crypto.spec.OAEPParameterSpec;
 import javax.crypto.spec.PSource;
 
@@ -80,7 +85,7 @@ class KeySafe {
         return null;
     }
 
-    public static KeyListItem genKey() {
+    public static KeyListItem genRSAKey() {
         try {
             KeyPairGenerator kpg = KeyPairGenerator.getInstance(KeyProperties.KEY_ALGORITHM_RSA, "AndroidKeyStore");
             kpg.initialize(new KeyGenParameterSpec.Builder(
@@ -102,6 +107,28 @@ class KeySafe {
             e.printStackTrace();
         }
 
+        return null;
+    }
+
+    public static KeyListItem genAESKey() {
+        try {
+            KeyGenerator kg = KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES, "AndroidKeyStore");
+            kg.init(
+                    new KeyGenParameterSpec.Builder("alias " + counter,
+                            KeyProperties.PURPOSE_ENCRYPT | KeyProperties.PURPOSE_DECRYPT)
+                            .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
+                            .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
+                            // NOTE no Random IV. According to above this is less secure but acceptably so.
+                            .setRandomizedEncryptionRequired(false)
+                            .build());
+            counter++;
+            SecretKey sk = kg.generateKey();
+            return new KeyListItem("alias " + counter, "AES", "Secretkey: " + sk.getFormat());
+
+        } catch(Exception e) {
+            Log.v("AES",e.toString());
+            e.printStackTrace();
+        }
         return null;
     }
 
@@ -265,4 +292,26 @@ class KeySafe {
         }
         return null;
     }
+
+    public static SecretKey getSecretKey(String keyAlias) {
+        try {
+            KeyStore ks = null;
+            ks = KeyStore.getInstance("AndroidKeyStore");
+            ks.load(null);
+            SecretKey secretKey = ((KeyStore.SecretKeyEntry) ks.getEntry(keyAlias, null)).getSecretKey();
+            return secretKey;
+        } catch (KeyStoreException e) {
+            e.printStackTrace();
+        } catch (CertificateException e) {
+            e.printStackTrace();
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (UnrecoverableEntryException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
 }

@@ -44,7 +44,7 @@ public class KeyManagerFragment extends Fragment {
         Button button_keygen = (Button) view.findViewById(R.id.button_keygen);
         button_keygen.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                keys.add(KeySafe.genKey());
+                keys.add(KeySafe.genAESKey());
                 keyList.notifyDataSetChanged();
             }
         });
