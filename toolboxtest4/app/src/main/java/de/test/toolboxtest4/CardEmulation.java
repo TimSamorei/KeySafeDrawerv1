@@ -13,6 +13,7 @@ import java.util.List;
 import static de.test.toolboxtest4.ISO7816.OFFSET_CDATA;
 import static de.test.toolboxtest4.ISO7816.OFFSET_INS;
 import static de.test.toolboxtest4.ISO7816.OFFSET_LC;
+import static de.test.toolboxtest4.ISO7816.SW_DATA_INVALID;
 import static de.test.toolboxtest4.ISO7816.SW_SUCCESS;
 import static de.test.toolboxtest4.ISO7816.SW_UNKNOWN;
 
@@ -29,6 +30,7 @@ public class CardEmulation extends HostApduService {
     private final static byte INS_GETDATA = (byte) 0xC0;
     private final static byte INS_ENCRYPT = (byte) 0xD0;
     private final static byte INS_DECRYPT = (byte) 0xE0;
+    private final static byte INS_INIT = (byte) 0xF0;
 
     private static String keyAlias = "alias 0";
 
@@ -78,7 +80,6 @@ public class CardEmulation extends HostApduService {
             case INS_ENCRYPT:
                 data = Arrays.copyOfRange(apdu, OFFSET_CDATA, OFFSET_CDATA + dataLen);
                 dataList = splitData(data);
-                //encdata = Crypto.encrypt(new String(dataList.get(0)), new String(dataList.get(1)), new String(dataList.get(2)));
                 encdata = Crypto.encrypt(new String(dataList.get(0)), keyAlias, new String(dataList.get(2)));
                 response = createResponse(Integer.toString(encdata.length).getBytes());
                 return response;
@@ -89,6 +90,20 @@ public class CardEmulation extends HostApduService {
                 decdata = Crypto.decrypt(dataList.get(0), keyAlias, new String(dataList.get(2)));
                 response = createResponse(Integer.toString(decdata.length).getBytes());
                 return response;
+
+            case INS_INIT:
+                data = Arrays.copyOfRange(apdu, OFFSET_CDATA, OFFSET_CDATA + dataLen);
+                dataList = splitData(data);
+                Log.d(TAG, "ALIASTEST: " + "alias " + new String(dataList.get(1)));
+                boolean validKey = KeySafe.checkKey("alias " + new String(dataList.get(1)));
+                Log.d(TAG, "ALIASTEST: " + validKey);
+
+                if (validKey) {
+                    setKeyAlias("alias " + new String(dataList.get(1)));
+                    return toBytes(SW_SUCCESS);
+                } else {
+                    return toBytes(SW_DATA_INVALID);
+                }
 
                 default:
                     return toBytes(SW_UNKNOWN);

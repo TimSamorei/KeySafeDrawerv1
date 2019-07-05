@@ -314,4 +314,21 @@ class KeySafe {
         return null;
     }
 
+    public static boolean checkKey(String s) {
+        KeyStore ks = null;
+        try {
+            ks = KeyStore.getInstance("AndroidKeyStore");
+            ks.load(null);
+            return ks.containsAlias(s);
+        } catch (KeyStoreException e) {
+            e.printStackTrace();
+        } catch (CertificateException e) {
+            e.printStackTrace();
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
 }
